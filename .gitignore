@@ -1,0 +1,6 @@
+vigil
+build/
+*.o
+*.a
+*.dSYM
+vigil.db
