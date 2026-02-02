@@ -35,5 +35,11 @@ test: $(TEST_BINS)
 	if [ $$fail -ne 0 ]; then echo "TESTS FAILED"; exit 1; fi; \
 	echo "ALL TESTS PASSED"
 
+fuzz: $(LIB_SRCS) tests/fuzz_main.c
+	@mkdir -p $(BUILD)
+	$(CC) -std=c11 -Wall -Wextra -O1 -g -fsanitize=address,undefined \
+		-o $(BUILD)/fuzz tests/fuzz_main.c $(LIB_SRCS) $(LDLIBS)
+	./$(BUILD)/fuzz
+
 clean:
 	rm -rf $(BUILD) $(BIN)
