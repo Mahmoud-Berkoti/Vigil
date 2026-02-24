@@ -33,7 +33,7 @@ Built phase by phase per `Vigil.md` (the project spec):
 
 - [x] Phase 0 — skeleton & data model (prefix/AS-path/event/alert types, config, stub pipeline)
 - [x] Phase 1 — BGP UPDATE wire parser (RFC 4271/4760/6793, fuzzed with ASan/UBSan)
-- [ ] Phase 2 — MRT archive ingestion
+- [x] Phase 2 — MRT archive ingestion (TABLE_DUMP_V2 + BGP4MP, cross-validated against mrtparse on a real 142k-record RIS dump)
 - [ ] Phase 3 — RIB construction
 - [ ] Phase 4 — RIPE RIS Live ingestion
 - [ ] Phase 5 — detection engine

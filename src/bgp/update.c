@@ -66,29 +66,9 @@ static int parse_mp_unreach(const uint8_t *v, size_t alen, vg_bgp_update_t *u) {
                            u->mp_unreach, &u->n_mp_unreach, VG_BGP_MAX_ROUTES);
 }
 
-int vg_bgp_parse_update(const uint8_t *payload, size_t n, bool as4,
-                        vg_bgp_update_t *out) {
-    memset(out, 0, sizeof(*out));
-    out->origin = VG_ORIGIN_UNSET;
-
-    /* Withdrawn Routes: 2-byte length + v4 NLRI run */
-    if (n < 2) return VG_BGP_ETRUNC;
-    uint16_t wlen = rd16(payload);
-    if ((size_t)wlen + 2 > n) return VG_BGP_EBADLEN;
-    int rc = decode_nlri_run(payload + 2, wlen, VG_AF_INET, out->withdrawn,
-                             &out->n_withdrawn, VG_BGP_MAX_ROUTES);
-    if (rc != VG_BGP_OK) return rc;
-    size_t off = 2u + wlen;
-
-    /* Total Path Attribute Length */
-    if (n - off < 2) return VG_BGP_ETRUNC;
-    uint16_t alen_total = rd16(payload + off);
-    off += 2;
-    if (alen_total > n - off) return VG_BGP_EBADLEN;
-    const uint8_t *attrs = payload + off;
-    size_t attrs_end = alen_total;
-    size_t nlri_off = off + alen_total;
-
+int vg_bgp_parse_attrs(const uint8_t *attrs, size_t attrs_end, bool as4,
+                       bool td2_mp_reach, vg_bgp_update_t *out) {
+    int rc;
     vg_aspath_t as4_path;
     memset(&as4_path, 0, sizeof(as4_path));
     bool have_as4_path = false;
@@ -159,8 +139,18 @@ int vg_bgp_parse_update(const uint8_t *payload, size_t n, bool as4,
                 out->communities[out->n_communities++] = rd32(v + i);
             break;
         case VG_ATTR_MP_REACH_NLRI:
-            rc = parse_mp_reach(v, alen, out);
-            if (rc != VG_BGP_OK) return rc;
+            /* RFC 6396 §4.3.4: inside TABLE_DUMP_V2 the attribute is
+             * abridged to nexthop-length + nexthop only. */
+            if (td2_mp_reach) {
+                if (alen < 1 || (size_t)v[0] + 1 > alen || v[0] > 32)
+                    return VG_BGP_EATTRLEN;
+                out->has_mp_reach = true;
+                out->mp_next_hop_len = v[0] > 16 ? 16 : v[0];
+                memcpy(out->mp_next_hop, v + 1, out->mp_next_hop_len);
+            } else {
+                rc = parse_mp_reach(v, alen, out);
+                if (rc != VG_BGP_OK) return rc;
+            }
             break;
         case VG_ATTR_MP_UNREACH_NLRI:
             rc = parse_mp_unreach(v, alen, out);
@@ -179,6 +169,33 @@ int vg_bgp_parse_update(const uint8_t *payload, size_t n, bool as4,
 
     if (have_as4_path && !as4 && out->has_path)
         merge_as4_path(&out->path, &as4_path);
+
+    return VG_BGP_OK;
+}
+
+int vg_bgp_parse_update(const uint8_t *payload, size_t n, bool as4,
+                        vg_bgp_update_t *out) {
+    memset(out, 0, sizeof(*out));
+    out->origin = VG_ORIGIN_UNSET;
+
+    /* Withdrawn Routes: 2-byte length + v4 NLRI run */
+    if (n < 2) return VG_BGP_ETRUNC;
+    uint16_t wlen = rd16(payload);
+    if ((size_t)wlen + 2 > n) return VG_BGP_EBADLEN;
+    int rc = decode_nlri_run(payload + 2, wlen, VG_AF_INET, out->withdrawn,
+                             &out->n_withdrawn, VG_BGP_MAX_ROUTES);
+    if (rc != VG_BGP_OK) return rc;
+    size_t off = 2u + wlen;
+
+    /* Total Path Attribute Length */
+    if (n - off < 2) return VG_BGP_ETRUNC;
+    uint16_t alen_total = rd16(payload + off);
+    off += 2;
+    if (alen_total > n - off) return VG_BGP_EBADLEN;
+    size_t nlri_off = off + alen_total;
+
+    rc = vg_bgp_parse_attrs(payload + off, alen_total, as4, false, out);
+    if (rc != VG_BGP_OK) return rc;
 
     /* Classic v4 NLRI: rest of message */
     rc = decode_nlri_run(payload + nlri_off, n - nlri_off, VG_AF_INET,

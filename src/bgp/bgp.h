@@ -135,6 +135,13 @@ typedef struct {
 int vg_bgp_parse_update(const uint8_t *payload, size_t n, bool as4,
                         vg_bgp_update_t *out);
 
+/* Parse a bare path-attribute blob into `out` (which the caller has
+ * zeroed and set origin=VG_ORIGIN_UNSET on). Used by the UPDATE parser
+ * and by MRT TABLE_DUMP_V2 RIB entries; `td2_mp_reach` selects the
+ * abridged MP_REACH_NLRI form of RFC 6396 §4.3.4. */
+int vg_bgp_parse_attrs(const uint8_t *attrs, size_t attrs_len, bool as4,
+                       bool td2_mp_reach, vg_bgp_update_t *out);
+
 /* Serialize a full UPDATE message (header included) for tests and
  * synthetic fixtures. Returns total length or negative error. */
 int vg_bgp_write_update(const vg_bgp_update_t *u, bool as4, uint8_t *buf,

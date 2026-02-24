@@ -35,6 +35,20 @@ test: $(TEST_BINS)
 	if [ $$fail -ne 0 ]; then echo "TESTS FAILED"; exit 1; fi; \
 	echo "ALL TESTS PASSED"
 
+# Download a real RIPE RIS update dump for cross-validation (not
+# needed for `make test`; the small carved fixture is checked in).
+RIS_URL ?= https://data.ris.ripe.net/rrc00/2026.07/updates.20260706.0000.gz
+fetch-data:
+	curl -s -o data/fixtures/ris-updates.gz "$(RIS_URL)"
+	gunzip -kf data/fixtures/ris-updates.gz
+
+# Cross-validate replay counts against mrtparse (pip3 install mrtparse)
+crosscheck: $(BIN)
+	python3 tools/crosscheck.py data/fixtures/updates-sample.mrt
+	@if [ -f data/fixtures/ris-updates ]; then \
+		python3 tools/crosscheck.py data/fixtures/ris-updates; \
+	fi
+
 fuzz: $(LIB_SRCS) tests/fuzz_main.c
 	@mkdir -p $(BUILD)
 	$(CC) -std=c11 -Wall -Wextra -O1 -g -fsanitize=address,undefined \

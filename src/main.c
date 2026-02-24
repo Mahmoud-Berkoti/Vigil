@@ -5,6 +5,7 @@
  */
 #include "core/config.h"
 #include "core/log.h"
+#include "ingest/mrtfile.h"
 #include "ingest/stub.h"
 #include "vigil.h"
 
@@ -25,10 +26,16 @@ static void log_sink(const vg_event_t *ev, void *user) {
     }
 }
 
+static void quiet_sink(const vg_event_t *ev, void *user) {
+    (void)ev;
+    (void)user;
+}
+
 static void usage(void) {
     fprintf(stderr,
-            "usage: vigil [-c config] [-v]\n"
+            "usage: vigil [-c config] [-r file.mrt] [-v]\n"
             "  -c FILE   config file (key=value)\n"
+            "  -r FILE   replay an MRT file and print stats, then exit\n"
             "  -v        debug logging\n");
 }
 
@@ -36,10 +43,12 @@ int main(int argc, char **argv) {
     vg_config_t cfg;
     vg_config_defaults(&cfg);
 
-    const char *config_path = NULL;
+    const char *config_path = NULL, *replay_path = NULL;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-c") == 0 && i + 1 < argc) {
             config_path = argv[++i];
+        } else if (strcmp(argv[i], "-r") == 0 && i + 1 < argc) {
+            replay_path = argv[++i];
         } else if (strcmp(argv[i], "-v") == 0) {
             vg_log_set_level(VG_LOG_DEBUG);
         } else {
@@ -48,6 +57,20 @@ int main(int argc, char **argv) {
         }
     }
     if (config_path && vg_config_load(&cfg, config_path) != 0) return 1;
+
+    if (replay_path) {
+        vg_mrt_stats_t st;
+        if (vg_mrt_replay(replay_path, cfg.replay_speed, quiet_sink, NULL, &st) != 0)
+            return 1;
+        printf("records=%llu updates=%llu rib_entries=%llu announces=%llu "
+               "withdraws=%llu prefixes=%llu origins=%llu errors=%llu skipped=%llu\n",
+               (unsigned long long)st.records, (unsigned long long)st.bgp_updates,
+               (unsigned long long)st.rib_entries, (unsigned long long)st.announces,
+               (unsigned long long)st.withdraws, (unsigned long long)st.unique_prefixes,
+               (unsigned long long)st.unique_origins, (unsigned long long)st.parse_errors,
+               (unsigned long long)st.skipped_records);
+        return 0;
+    }
 
     vg_log(VG_LOG_INFO, "main", "vigil starting (api_port=%d watch=%d)",
            cfg.api_port, cfg.n_watch);
