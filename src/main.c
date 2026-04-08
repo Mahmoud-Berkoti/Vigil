@@ -6,12 +6,21 @@
 #include "core/config.h"
 #include "core/log.h"
 #include "ingest/mrtfile.h"
+#include "ingest/rislive.h"
 #include "ingest/stub.h"
 #include "rib/rib.h"
 #include "vigil.h"
 
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+
+static volatile sig_atomic_t g_shutdown = 0;
+static void on_signal(int sig) {
+    (void)sig;
+    g_shutdown = 1;
+}
 
 static void log_sink(const vg_event_t *ev, void *user) {
     (void)user;
@@ -104,6 +113,47 @@ int main(int argc, char **argv) {
 
     vg_log(VG_LOG_INFO, "main", "vigil starting (api_port=%d watch=%d)",
            cfg.api_port, cfg.n_watch);
+
+    if (cfg.rislive_enabled) {
+        signal(SIGINT, on_signal);
+        signal(SIGTERM, on_signal);
+
+        vg_rib_t *rib = vg_rib_new();
+        if (!rib) return 1;
+
+        vg_rislive_opts_t opts;
+        memset(&opts, 0, sizeof(opts));
+        snprintf(opts.host, sizeof(opts.host), "%s", cfg.rislive_host);
+        snprintf(opts.prefix, sizeof(opts.prefix), "%s", cfg.rislive_prefix);
+        vg_rislive_t *live = vg_rislive_start(&opts, vg_rib_sink, rib);
+        if (!live) {
+            vg_rib_free(rib);
+            return 1;
+        }
+
+        uint64_t last_events = 0;
+        while (!g_shutdown) {
+            sleep(5);
+            vg_rislive_stats_t st;
+            vg_rislive_stats(live, &st);
+            vg_rib_stats_t rs;
+            vg_rib_stats(rib, &rs);
+            vg_log(VG_LOG_INFO, "main",
+                   "live: %.1f ev/s (total=%llu errors=%llu reconnects=%llu "
+                   "connected=%d) rib: prefixes=%llu routes=%llu",
+                   (double)(st.events - last_events) / 5.0,
+                   (unsigned long long)st.events,
+                   (unsigned long long)st.parse_errors,
+                   (unsigned long long)st.reconnects, st.connected ? 1 : 0,
+                   (unsigned long long)rs.prefixes,
+                   (unsigned long long)rs.routes);
+            last_events = st.events;
+        }
+        vg_log(VG_LOG_INFO, "main", "shutting down");
+        vg_rislive_stop(live);
+        vg_rib_free(rib);
+        return 0;
+    }
 
     vg_stub_run(log_sink, NULL);
 

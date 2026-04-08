@@ -35,7 +35,7 @@ Built phase by phase per `Vigil.md` (the project spec):
 - [x] Phase 1 — BGP UPDATE wire parser (RFC 4271/4760/6793, fuzzed with ASan/UBSan)
 - [x] Phase 2 — MRT archive ingestion (TABLE_DUMP_V2 + BGP4MP, cross-validated against mrtparse on a real 142k-record RIS dump)
 - [x] Phase 3 — RIB (per-peer Adj-RIB-In, trie queries, history; origin spot-checked against bgp.tools)
-- [ ] Phase 4 — RIPE RIS Live ingestion
+- [x] Phase 4 — RIPE RIS Live ingestion (libcurl HTTP stream, ~2k ev/s live, reconnect + backoff; opt-in)
 - [ ] Phase 5 — detection engine
 - [ ] Phase 6 — RPKI origin validation
 - [ ] Phase 7 — alerts, API, dashboard, observability
