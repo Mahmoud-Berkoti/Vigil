@@ -147,4 +147,7 @@ typedef struct {
 const char *vg_alert_type_str(vg_alert_type_t t);
 const char *vg_severity_str(vg_severity_t s);
 
+/* Consumers of detector output (store, notifier, log). */
+typedef void (*vg_alert_sink_fn)(const vg_alert_t *alert, void *user);
+
 #endif /* VIGIL_H */

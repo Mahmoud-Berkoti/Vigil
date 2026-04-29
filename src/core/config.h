@@ -29,6 +29,15 @@ typedef struct {
     double baseline_window; /* secs of observation before hijack alerts fire */
     double spike_window;    /* rolling window for rate detection, secs */
     double spike_factor;    /* burst multiple over baseline that alerts */
+    int    spike_min;       /* minimum window count before spike alerts */
+
+    /* AS relationships for valley-free leak detection.
+     * rel_provider[i] is the provider of rel_customer[i]. */
+#define VG_MAX_RELS 4096
+    int      n_rels;
+    uint32_t rel_provider[VG_MAX_RELS], rel_customer[VG_MAX_RELS];
+    int      n_peer_rels;
+    uint32_t peer_a[VG_MAX_RELS], peer_b[VG_MAX_RELS];
 } vg_config_t;
 
 void vg_config_defaults(vg_config_t *c);

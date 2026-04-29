@@ -36,6 +36,6 @@ Built phase by phase per `Vigil.md` (the project spec):
 - [x] Phase 2 — MRT archive ingestion (TABLE_DUMP_V2 + BGP4MP, cross-validated against mrtparse on a real 142k-record RIS dump)
 - [x] Phase 3 — RIB (per-peer Adj-RIB-In, trie queries, history; origin spot-checked against bgp.tools)
 - [x] Phase 4 — RIPE RIS Live ingestion (libcurl HTTP stream, ~2k ev/s live, reconnect + backoff; opt-in)
-- [ ] Phase 5 — detection engine
+- [x] Phase 5 — detection engine (origin/sub-prefix hijack, valley-free leak heuristic, spike/flap; zero false positives on clean + real traffic)
 - [ ] Phase 6 — RPKI origin validation
 - [ ] Phase 7 — alerts, API, dashboard, observability

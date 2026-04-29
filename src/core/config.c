@@ -13,6 +13,7 @@ void vg_config_defaults(vg_config_t *c) {
     c->baseline_window = 300;
     c->spike_window = 60;
     c->spike_factor = 10;
+    c->spike_min = 20;
 }
 
 static void trim(char *s) {
@@ -79,6 +80,32 @@ int vg_config_load(vg_config_t *c, const char *path) {
             c->spike_window = atof(val);
         } else if (strcmp(key, "spike_factor") == 0) {
             c->spike_factor = atof(val);
+        } else if (strcmp(key, "spike_min") == 0) {
+            c->spike_min = atoi(val);
+        } else if (strcmp(key, "rel_provider") == 0) {
+            /* "rel_provider = 3356 64500": AS3356 is AS64500's provider */
+            unsigned long p2 = 0, c2 = 0;
+            if (sscanf(val, "%lu %lu", &p2, &c2) != 2 || c->n_rels >= VG_MAX_RELS) {
+                vg_log(VG_LOG_ERROR, "config", "%s:%d: bad rel_provider '%s'",
+                       path, lineno, val);
+                rc = -1;
+                break;
+            }
+            c->rel_provider[c->n_rels] = (uint32_t)p2;
+            c->rel_customer[c->n_rels] = (uint32_t)c2;
+            c->n_rels++;
+        } else if (strcmp(key, "rel_peer") == 0) {
+            unsigned long a = 0, b = 0;
+            if (sscanf(val, "%lu %lu", &a, &b) != 2 ||
+                c->n_peer_rels >= VG_MAX_RELS) {
+                vg_log(VG_LOG_ERROR, "config", "%s:%d: bad rel_peer '%s'",
+                       path, lineno, val);
+                rc = -1;
+                break;
+            }
+            c->peer_a[c->n_peer_rels] = (uint32_t)a;
+            c->peer_b[c->n_peer_rels] = (uint32_t)b;
+            c->n_peer_rels++;
         } else if (strcmp(key, "watch") == 0) {
             /* "watch = 192.0.2.0/24 64500" or "watch = 192.0.2.0/24" */
             if (c->n_watch >= VG_MAX_WATCH) {
