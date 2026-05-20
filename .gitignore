@@ -6,3 +6,4 @@ build/
 vigil.db
 data/fixtures/ris-updates
 data/fixtures/ris-updates.gz
+data/vrp/rpki.json

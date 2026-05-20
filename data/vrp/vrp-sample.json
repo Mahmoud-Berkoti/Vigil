@@ -1,0 +1,13 @@
+{
+  "metadata": { "generated": 1751846400, "counts": 7 },
+  "roas": [
+    { "asn": "AS13335", "prefix": "1.1.1.0/24", "maxLength": 24, "ta": "apnic" },
+    { "asn": "AS15169", "prefix": "8.8.8.0/24", "maxLength": 24, "ta": "arin" },
+    { "asn": "AS64500", "prefix": "192.0.2.0/24", "maxLength": 28, "ta": "test" },
+    { "asn": 64501, "prefix": "198.51.100.0/24", "ta": "test" },
+    { "asn": "AS64500", "prefix": "203.0.113.0/24", "maxLength": 24, "ta": "test" },
+    { "asn": "AS64502", "prefix": "203.0.113.0/24", "maxLength": 26, "ta": "test" },
+    { "asn": "AS0", "prefix": "10.66.0.0/16", "maxLength": 16, "ta": "test" },
+    { "asn": "AS64510", "prefix": "2001:db8::/32", "maxLength": 48, "ta": "test" }
+  ]
+}

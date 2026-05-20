@@ -37,5 +37,5 @@ Built phase by phase per `Vigil.md` (the project spec):
 - [x] Phase 3 — RIB (per-peer Adj-RIB-In, trie queries, history; origin spot-checked against bgp.tools)
 - [x] Phase 4 — RIPE RIS Live ingestion (libcurl HTTP stream, ~2k ev/s live, reconnect + backoff; opt-in)
 - [x] Phase 5 — detection engine (origin/sub-prefix hijack, valley-free leak heuristic, spike/flap; zero false positives on clean + real traffic)
-- [ ] Phase 6 — RPKI origin validation
+- [x] Phase 6 — RPKI origin validation (RFC 6811 + AS0/maxLength; 971k real VRPs, cross-checked vs RIPEstat)
 - [ ] Phase 7 — alerts, API, dashboard, observability

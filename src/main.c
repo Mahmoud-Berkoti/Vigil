@@ -13,6 +13,7 @@
 
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -55,9 +56,32 @@ static void print_route(const vg_prefix_t *p, const vg_rib_route_t *r,
            r->peer_asn, path, vg_aspath_origin(&r->path));
 }
 
+#include "rpki/rpki.h"
+
+/* vigil rov VRP.json PREFIX ASN — classify one route, print the state */
+static int cmd_rov(int argc, char **argv) {
+    if (argc != 5) {
+        fprintf(stderr, "usage: vigil rov VRP.json PREFIX ASN\n");
+        return 2;
+    }
+    vg_rpki_t *r = vg_rpki_load(argv[2]);
+    if (!r) return 1;
+    vg_prefix_t p;
+    if (vg_prefix_parse(argv[3], &p) != 0) {
+        fprintf(stderr, "bad prefix: %s\n", argv[3]);
+        return 2;
+    }
+    uint32_t asn = (uint32_t)strtoul(argv[4], NULL, 10);
+    printf("%s\n", vg_rov_str(vg_rpki_validate(r, &p, asn)));
+    vg_rpki_free(r);
+    return 0;
+}
+
 int main(int argc, char **argv) {
     vg_config_t cfg;
     vg_config_defaults(&cfg);
+
+    if (argc >= 2 && strcmp(argv[1], "rov") == 0) return cmd_rov(argc, argv);
 
     const char *config_path = NULL, *replay_path = NULL, *query_prefix = NULL;
     for (int i = 1; i < argc; i++) {
