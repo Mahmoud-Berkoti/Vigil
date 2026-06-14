@@ -55,5 +55,8 @@ fuzz: $(LIB_SRCS) tests/fuzz_main.c
 		-o $(BUILD)/fuzz tests/fuzz_main.c $(LIB_SRCS) $(LDLIBS)
 	./$(BUILD)/fuzz
 
+demo: $(BIN)
+	./tools/demo.sh
+
 clean:
 	rm -rf $(BUILD) $(BIN)

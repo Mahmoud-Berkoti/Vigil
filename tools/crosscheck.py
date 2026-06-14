@@ -90,8 +90,9 @@ def main():
     print("reference:", " ".join(f"{k}={v}" for k, v in ref.items()))
 
     out = subprocess.check_output(["./vigil", "-r", path], text=True)
-    print("vigil:    ", out.strip())
-    got = dict(kv.split("=") for kv in out.split())
+    first_line = out.splitlines()[0]
+    print("vigil:    ", first_line)
+    got = dict(kv.split("=") for kv in first_line.split())
 
     mismatches = []
     for key in ("updates", "rib_entries", "announces", "withdraws",

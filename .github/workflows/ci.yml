@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlite3-dev libcurl4-openssl-dev clang-tools
+
+      - name: Build
+        run: make -j"$(nproc)"
+
+      - name: Unit + scenario tests
+        run: make test
+
+      - name: Fuzz (short duration, ASan/UBSan)
+        run: FUZZ_ITERS=200000 make fuzz
+
+      - name: cppcheck / static analysis
+        run: |
+          sudo apt-get install -y cppcheck
+          cppcheck --error-exitcode=1 --enable=warning,portability \
+            --suppress=missingIncludeSystem -I src src
+
+      - name: RIS Live smoke test (opt-in, skipped if egress blocked)
+        continue-on-error: true
+        run: VIGIL_LIVE_TEST=1 ./build/tests/test_rislive
+
+      - name: Scripted demo (replay -> hijack alert -> API)
+        run: make demo
