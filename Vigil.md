@@ -10,7 +10,7 @@ Vigil is a BGP route monitoring and anomaly detection system. It ingests BGP upd
 
 **Why this matters for Cisco:** Cisco is one of the largest players in service-provider and enterprise routing, and BGP is the backbone protocol their core routing business depends on. Building a tool that speaks BGP at the protocol level, parses real UPDATE messages, and reasons about AS paths and origins demonstrates routing understanding that is rare for an intern and squarely on Cisco's core identity as a routing/switching company.
 
-## 2. Learning Goals (what Mahmoud must be able to explain afterward)
+## 2. Learning Goals (what you must be able to explain afterward)
 
 - The BGP finite state machine (Idle -> Connect -> OpenSent -> OpenConfirm -> Established) and the four message types (OPEN, UPDATE, KEEPALIVE, NOTIFICATION)
 - BGP UPDATE structure: withdrawn routes, path attributes (ORIGIN, AS_PATH, NEXT_HOP, MED, LOCAL_PREF, communities), and NLRI
@@ -24,7 +24,7 @@ Vigil is a BGP route monitoring and anomaly detection system. It ingests BGP upd
 
 | Component | Choice | Rationale |
 |---|---|---|
-| Language | Go 1.22+ | Networking, concurrency, matches Mahmoud's stack |
+| Language | Go 1.22+ | Networking, concurrency, matches the author's stack |
 | BGP session (optional live peering) | Implement OPEN/KEEPALIVE/UPDATE parsing ourselves; optionally interop with a local GoBGP or BIRD/FRR instance as the peer | Parsing UPDATEs by hand is the learning core; a real daemon provides a safe peer |
 | Feed ingestion | RIPE RIS Live (websocket JSON) for live, MRT file parsing for archives (RouteViews/RIPE dumps) | Real data without needing to peer with the global table |
 | RPKI | Consume a public VRP dump (JSON from an RPKI validator like Routinator's output, or the RIPE RPKI data) | Enables origin validation without running full RPKI crypto |
@@ -168,7 +168,7 @@ Implement detectors, each with clear definitions and tests using synthetic scena
 
 Document each source, its format, and its rate limits in the README. Re-emphasize: this tool never announces or injects routes.
 
-## 9. Interview Talking Points (study these, Mahmoud)
+## 9. Interview Talking Points (study these)
 
 - The BGP FSM and the four message types; what is in an UPDATE and why AS_PATH is the security-relevant attribute.
 - What a prefix hijack vs sub-prefix hijack vs route leak is, with a concrete historical example, and why more-specifics are so dangerous.
