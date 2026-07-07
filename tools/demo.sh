@@ -5,8 +5,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 FIXTURE=data/fixtures/demo-hijack.mrt
-CONF=$(mktemp -t vigil-demo-conf)
-DB=$(mktemp -t vigil-demo-db)
+CONF=$(mktemp -t vigil-demo-conf.XXXXXX)
+DB=$(mktemp -t vigil-demo-db.XXXXXX)
 PORT=8099
 
 rm -f "$DB"
