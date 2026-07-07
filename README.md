@@ -111,19 +111,22 @@ Dashboard: `http://localhost:8080/` · REST: `GET /api/v1/prefixes/{p}`,
   produces zero hijack/sub-prefix/leak/RPKI-invalid alerts with no
   watchlist/relationships configured.
 
-## Status
+## What's implemented
 
-Built phase by phase per `Vigil.md` (the project spec), each phase committed
-separately with its own acceptance evidence:
-
-- [x] Phase 0 — skeleton & data model (prefix/AS-path/event/alert types, config, stub pipeline)
-- [x] Phase 1 — BGP UPDATE wire parser (RFC 4271/4760/6793, fuzzed with ASan/UBSan)
-- [x] Phase 2 — MRT archive ingestion (TABLE_DUMP_V2 + BGP4MP, cross-validated against mrtparse on a real 142k-record RIS dump)
-- [x] Phase 3 — RIB (per-peer Adj-RIB-In, trie queries, history; origin spot-checked against bgp.tools)
-- [x] Phase 4 — RIPE RIS Live ingestion (libcurl HTTP stream, ~2k ev/s live, reconnect + backoff; opt-in)
-- [x] Phase 5 — detection engine (origin/sub-prefix hijack, valley-free leak heuristic, spike/flap; zero false positives on clean + real traffic)
-- [x] Phase 6 — RPKI origin validation (RFC 6811 + AS0/maxLength; 971k real VRPs, cross-checked vs RIPEstat)
-- [x] Phase 7 — alerts (SQLite + webhook), REST API, dashboard, Prometheus metrics, `make demo`, CI
+- BGP UPDATE wire parser (RFC 4271, MP-BGP/RFC 4760, 4-octet ASNs/RFC 6793),
+  fuzzed with ASan/UBSan
+- MRT archive ingestion (TABLE_DUMP_V2 + BGP4MP), cross-validated against
+  `mrtparse` on a real 142k-record RIPE RIS dump
+- A per-peer RIB (Adj-RIB-In) with trie-based more-specific/covering queries
+  and per-prefix change history
+- Live RIPE RIS ingestion over HTTP streaming, with reconnect/backoff
+- A detection engine: origin hijacks, sub-prefix hijacks, valley-free route-leak
+  heuristics, and update-rate spike/flap detection — with zero false positives
+  on real traffic in testing
+- RPKI Route Origin Validation (RFC 6811, including maxLength and AS0 ROAs),
+  cross-checked against RIPEstat on real VRP data
+- Alert storage (SQLite) with optional webhook delivery, a REST API, a live
+  web dashboard, and Prometheus metrics
 
 ## Testing strategy
 
