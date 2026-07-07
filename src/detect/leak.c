@@ -54,7 +54,7 @@ void vg_detect_leak(vg_engine_t *e, const vg_event_t *ev) {
             vg_aspath_format(p, path, sizeof(path));
             snprintf(a.summary, sizeof(a.summary),
                      "route leak: AS%u re-exported %s %s AS%u after a "
-                     "downward/peer segment (path %s)",
+                     "downward/peer segment (path %.96s)",
                      from, pfx, rel == VG_REL_PEER ? "across peering to" : "up to",
                      to, path);
             char extra[96];
