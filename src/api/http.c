@@ -145,13 +145,12 @@ static int read_request(int fd, vg_http_req_t *req, char **body, size_t *blen) {
     char *qmark = strchr(path_raw, '?');
     if (qmark) {
         *qmark = '\0';
-        snprintf(req->query, sizeof(req->query), "%s", qmark + 1);
+        snprintf(req->query, sizeof(req->query), "%.*s",
+                (int)sizeof(req->query) - 1, qmark + 1);
     } else {
         req->query[0] = '\0';
     }
-    char decoded[1024];
-    url_decode(path_raw, decoded, sizeof(decoded));
-    snprintf(req->path, sizeof(req->path), "%s", decoded);
+    url_decode(path_raw, req->path, sizeof(req->path));
 
     /* Content-Length (case-insensitive) */
     size_t content_len = 0;

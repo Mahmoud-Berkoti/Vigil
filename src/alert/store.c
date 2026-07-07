@@ -145,11 +145,11 @@ int vg_store_query(vg_store_t *s, const vg_store_filter_t *f,
         if (pfx && pfx[0]) vg_prefix_parse(pfx, &a.prefix);
         a.expected_asn = (uint32_t)sqlite3_column_int64(st, 5);
         a.observed_asn = (uint32_t)sqlite3_column_int64(st, 6);
-        snprintf(a.peer, sizeof(a.peer), "%s",
+        snprintf(a.peer, sizeof(a.peer), "%.*s", (int)sizeof(a.peer) - 1,
                  (const char *)sqlite3_column_text(st, 7));
-        snprintf(a.summary, sizeof(a.summary), "%s",
+        snprintf(a.summary, sizeof(a.summary), "%.*s", (int)sizeof(a.summary) - 1,
                  (const char *)sqlite3_column_text(st, 8));
-        snprintf(a.evidence, sizeof(a.evidence), "%s",
+        snprintf(a.evidence, sizeof(a.evidence), "%.*s", (int)sizeof(a.evidence) - 1,
                  (const char *)sqlite3_column_text(st, 9));
 
         /* severity filter applied post-decode (>= minimum) */

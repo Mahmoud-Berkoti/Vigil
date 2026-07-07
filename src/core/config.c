@@ -59,21 +59,27 @@ int vg_config_load(vg_config_t *c, const char *path) {
         if (strcmp(key, "api_port") == 0) {
             c->api_port = atoi(val);
         } else if (strcmp(key, "mrt_file") == 0) {
-            snprintf(c->mrt_file, sizeof(c->mrt_file), "%s", val);
+            snprintf(c->mrt_file, sizeof(c->mrt_file), "%.*s",
+                    (int)sizeof(c->mrt_file) - 1, val);
         } else if (strcmp(key, "replay_speed") == 0) {
             c->replay_speed = atof(val);
         } else if (strcmp(key, "rislive_enabled") == 0) {
             c->rislive_enabled = parse_bool(val);
         } else if (strcmp(key, "rislive_host") == 0) {
-            snprintf(c->rislive_host, sizeof(c->rislive_host), "%s", val);
+            snprintf(c->rislive_host, sizeof(c->rislive_host), "%.*s",
+                    (int)sizeof(c->rislive_host) - 1, val);
         } else if (strcmp(key, "rislive_prefix") == 0) {
-            snprintf(c->rislive_prefix, sizeof(c->rislive_prefix), "%s", val);
+            snprintf(c->rislive_prefix, sizeof(c->rislive_prefix), "%.*s",
+                    (int)sizeof(c->rislive_prefix) - 1, val);
         } else if (strcmp(key, "vrp_file") == 0) {
-            snprintf(c->vrp_file, sizeof(c->vrp_file), "%s", val);
+            snprintf(c->vrp_file, sizeof(c->vrp_file), "%.*s",
+                    (int)sizeof(c->vrp_file) - 1, val);
         } else if (strcmp(key, "alert_db") == 0) {
-            snprintf(c->alert_db, sizeof(c->alert_db), "%s", val);
+            snprintf(c->alert_db, sizeof(c->alert_db), "%.*s",
+                    (int)sizeof(c->alert_db) - 1, val);
         } else if (strcmp(key, "webhook_url") == 0) {
-            snprintf(c->webhook_url, sizeof(c->webhook_url), "%s", val);
+            snprintf(c->webhook_url, sizeof(c->webhook_url), "%.*s",
+                    (int)sizeof(c->webhook_url) - 1, val);
         } else if (strcmp(key, "baseline_window") == 0) {
             c->baseline_window = atof(val);
         } else if (strcmp(key, "spike_window") == 0) {

@@ -262,7 +262,8 @@ vg_api_t *vg_api_start(int port, vg_rib_t *rib, vg_engine_t *engine,
     api->engine = engine;
     api->store = store;
     api->live = live;
-    snprintf(api->web_dir, sizeof(api->web_dir), "%s", web_dir ? web_dir : "web");
+    snprintf(api->web_dir, sizeof(api->web_dir), "%.*s", (int)sizeof(api->web_dir) - 1,
+            web_dir ? web_dir : "web");
 
     api->http = vg_http_server_new(port);
     if (!api->http) {

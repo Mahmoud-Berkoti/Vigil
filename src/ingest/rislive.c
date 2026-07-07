@@ -85,7 +85,8 @@ int vg_rislive_handle_line(const char *line, size_t len,
     memset(&base, 0, sizeof(base));
     base.timestamp = vg_json_num(data, "timestamp", 0);
     base.peer_asn = (uint32_t)vg_json_num(data, "peer_asn", 0);
-    snprintf(base.peer, sizeof(base.peer), "%s", vg_json_str(data, "peer", "?"));
+    snprintf(base.peer, sizeof(base.peer), "%.*s", (int)sizeof(base.peer) - 1,
+            vg_json_str(data, "peer", "?"));
     snprintf(base.source, sizeof(base.source), "rislive");
     base.origin_attr = VG_ORIGIN_UNSET;
 
