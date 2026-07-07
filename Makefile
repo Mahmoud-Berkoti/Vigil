@@ -1,5 +1,7 @@
 CC      ?= cc
-CFLAGS  ?= -std=c11 -Wall -Wextra -Werror -O2 -g
+# _DEFAULT_SOURCE exposes POSIX/BSD APIs (strdup, strcasecmp, usleep, ...)
+# under -std=c11 on glibc; macOS's libc doesn't need it but it's harmless there.
+CFLAGS  ?= -std=c11 -D_DEFAULT_SOURCE -Wall -Wextra -Werror -O2 -g
 LDLIBS   = -lsqlite3 -lcurl -lpthread
 
 BUILD   := build
@@ -51,7 +53,7 @@ crosscheck: $(BIN)
 
 fuzz: $(LIB_SRCS) tests/fuzz_main.c
 	@mkdir -p $(BUILD)
-	$(CC) -std=c11 -Wall -Wextra -O1 -g -fsanitize=address,undefined \
+	$(CC) -std=c11 -D_DEFAULT_SOURCE -Wall -Wextra -O1 -g -fsanitize=address,undefined \
 		-o $(BUILD)/fuzz tests/fuzz_main.c $(LIB_SRCS) $(LDLIBS)
 	./$(BUILD)/fuzz
 
